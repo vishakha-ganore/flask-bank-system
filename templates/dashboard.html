@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Welcome, {{ user.name }}!</h1>
+<p class="lead">Account #{{ user.account_number }}</p>
+
+<!-- Account Summary & Actions -->
+<div class="row">
+    <!-- Balance -->
+    <div class="col-md-4 mb-4">
+        <div class="card text-center text-bg-primary h-100">
+            <div class="card-header">Current Balance</div>
+            <div class="card-body">
+                <h2 class="card-title display-4">${{ "%.2f"|format(user.balance) }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions: Deposit/Withdraw -->
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Make a Transaction</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('handle_transaction') }}" method="post" class="row g-3 align-items-end">
+                    <div class="col">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" class="form-control" id="amount" name="amount" required min="0.01">
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" name="action" value="deposit" class="btn btn-success">Deposit</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" name="action" value="withdraw" class="btn btn-danger">Withdraw</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction History -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Transaction History</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td>{{ tx.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if tx.type == 'deposit' %}
+                                <span class="badge bg-success text-capitalize">{{ tx.type }}</span>
+                            {% else %}
+                                <span class="badge bg-danger text-capitalize">{{ tx.type }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold 
+                            {% if tx.type == 'deposit' %}text-success{% else %}text-danger{% endif %}">
+                            ${{ "%.2f"|format(tx.amount) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No transactions yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
